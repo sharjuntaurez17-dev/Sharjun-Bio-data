@@ -541,6 +541,8 @@
         background: transparent;
         color: #fff;
         min-height: calc(100vh - 80px);
+        /* svh = screen height with the phone browser's bars showing */
+        min-height: calc(100svh - 80px);
       }
 
       .page.stepper .step.active {
@@ -618,13 +620,17 @@
       .page.stepper .step.step-hero {
         padding: 0;
         min-height: 100vh;
+        min-height: 100svh;
       }
 
+      /* svh keeps "View biodata" above a phone's browser bar;
+         320px floor still fits a sideways phone */
       .hero {
         position: relative;
         width: 100%;
         height: 100vh;
-        min-height: 480px;
+        height: 100svh;
+        min-height: 320px;
         overflow: hidden;
         color: #e1e0cc;
       }
@@ -673,14 +679,15 @@
         z-index: 10;
         display: flex;
         align-items: center;
-        gap: 12px;
-        padding: 8px 16px;
+        /* spacing lives in the links' padding so the whole bar is tappable */
+        padding: 0 10px;
         background: #000;
         border-radius: 0 0 16px 16px;
         white-space: nowrap;
       }
 
       .hero-nav a {
+        padding: 8px 6px;
         font-size: 10px;
         color: rgba(225, 224, 204, 0.8);
         text-decoration: none;
@@ -695,9 +702,9 @@
         color: var(--lime);
       }
 
-      /* Keep page content clear of the pinned menu */
+      /* Keep page content clear of the pinned menu; 20px side margins */
       .page.stepper .step:not(.step-hero) {
-        padding-top: 64px;
+        padding: 72px 20px 24px;
       }
 
       .hero-content {
@@ -808,9 +815,10 @@
 
       @media (min-width: 640px) {
         .hero-nav {
-          gap: 24px;
+          padding: 0 4px;
         }
         .hero-nav a {
+          padding: 8px 12px;
           font-size: 12px;
         }
         .hero-side p {
@@ -827,11 +835,11 @@
 
       @media (min-width: 768px) {
         .hero-nav {
-          gap: 48px;
-          padding: 8px 32px;
+          padding: 0 8px;
           border-radius: 0 0 24px 24px;
         }
         .hero-nav a {
+          padding: 8px 24px;
           font-size: 14px;
         }
         .hero-content {
@@ -857,41 +865,164 @@
         }
       }
 
-      /* Text overrides for all stepper steps */
-      .page.stepper .sec-title,
-      .page.stepper .sec-title.light {
-        color: var(--lime);
+      /* Touch screens: taller menu links so they're easy to tap */
+      @media (pointer: coarse) {
+        .hero-nav a {
+          padding-top: 12px;
+          padding-bottom: 12px;
+        }
       }
 
-      /* Plain links (e.g. business venture) — inline gold overridden */
-      .page.stepper .f-sub a:not(.rainbow-border) {
-        color: var(--lime) !important;
+      /* ── Family page: ContainerScroll (vanilla port of Aceternity's
+         container-scroll-animation). It plays by itself each time the
+         page opens — the card tilts flat and the title rises — and the
+         card fills the screen below the title. ── */
+      .page.stepper .step:has(.cs-container) {
+        padding: 64px 12px 12px;
       }
 
-      .page.stepper .f-label,
-      .page.stepper .f-label.light {
-        color: rgba(255, 255, 255, 0.55);
+      .cs-container {
+        --cs-from-scale: 0.88;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        max-width: 64rem;
+        perspective: 1000px;
       }
 
-      .page.stepper .f-value,
-      .page.stepper .f-value.light {
+      .cs-header {
+        padding: 8px 0 20px;
+        text-align: center;
+      }
+
+      .cs-title {
+        font-size: clamp(34px, 6vw, 64px);
+        font-weight: 700;
+        line-height: 1.05;
+        letter-spacing: -0.03em;
         color: #fff;
       }
 
-      .page.stepper .f-sub,
-      .page.stepper .f-sub.light {
-        color: rgba(255, 255, 255, 0.45);
+      .cs-title span {
+        color: var(--lime);
       }
 
-      .page.stepper .placeholder,
-      .page.stepper .placeholder.light {
-        color: rgba(255, 255, 255, 0.3);
+      .cs-card {
+        flex: 1;
+        display: flex;
+        padding: 8px;
+        border: 4px solid #6c6c6c;
+        border-radius: 30px;
+        background: #222;
+        box-shadow:
+          0 0 #0000004d,
+          0 9px 20px #0000004a,
+          0 37px 37px #00000042,
+          0 84px 50px #00000026,
+          0 149px 60px #0000000a,
+          0 233px 65px #00000003;
       }
 
-      .page.stepper .gold-line,
-      .page.stepper .gold-line.light {
+      .cs-screen {
+        flex: 1;
+        overflow: hidden;
+        border-radius: 20px;
+        padding: 20px 16px;
+        background: var(--midnight);
+      }
+
+      .cs-screen .section {
+        margin-bottom: 0;
+      }
+
+      .step.active .cs-header {
+        animation: csHeaderIn 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.1s backwards;
+      }
+
+      .step.active .cs-card {
+        animation: csCardIn 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.1s backwards;
+      }
+
+      @keyframes csHeaderIn {
+        from {
+          opacity: 0;
+          transform: translateY(60px);
+        }
+      }
+
+      /* Same start pose as the component: rotateX 20°, scale 0.7–0.9 on
+         phones / 1.05 on desktop — ending flat at full size */
+      @keyframes csCardIn {
+        from {
+          opacity: 0;
+          transform: rotateX(20deg) scale(var(--cs-from-scale));
+        }
+      }
+
+      @media (min-width: 768px) {
+        .page.stepper .step:has(.cs-container) {
+          padding: 72px 32px 16px;
+        }
+        .cs-container {
+          --cs-from-scale: 1.05;
+        }
+        .cs-card {
+          padding: 16px;
+        }
+        .cs-screen {
+          padding: 32px 40px;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .step.active .cs-header,
+        .step.active .cs-card {
+          animation: none;
+        }
+      }
+
+      /* ── Apple-style type & layout for pages 2–6: system font, large
+         titles, rows grouped in rounded cards like iOS Settings ── */
+      .page.stepper .step:not(.step-hero),
+      .page.stepper .hero-nav {
+        font-family:
+          -apple-system,
+          BlinkMacSystemFont,
+          "SF Pro Text",
+          "Segoe UI Variable Text",
+          "Segoe UI",
+          system-ui,
+          sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .page.stepper .step .section {
+        width: 100%;
+        max-width: 680px;
+        margin: 0 auto 32px;
+      }
+
+      .page.stepper .step .section:last-child {
+        margin-bottom: 0;
+      }
+
+      .page.stepper .sec-header {
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+
+      /* Section icon sits in a rounded tile, like an iOS Settings icon */
+      .page.stepper .sec-icon {
+        width: 32px;
+        height: 32px;
+        padding: 6px;
+        border-radius: 9px;
         background: var(--cobalt);
-        opacity: 1;
+      }
+
+      .page.stepper .sec-icon:not([fill="none"]) {
+        fill: var(--lime);
       }
 
       .page.stepper .sec-icon path,
@@ -902,103 +1033,265 @@
         stroke: var(--lime);
       }
 
-      /* Navigation bar */
+      .page.stepper .sec-title,
+      .page.stepper .sec-title.light {
+        font-size: clamp(28px, 4vw, 34px);
+        font-weight: 700;
+        line-height: 1.15;
+        letter-spacing: -0.02em;
+        text-transform: none;
+        color: var(--lime);
+      }
+
+      /* Grouping replaces the divider line */
+      .page.stepper .gold-line {
+        display: none;
+      }
+
+      .page.stepper .group {
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.05);
+        -webkit-backdrop-filter: blur(20px) saturate(160%);
+        backdrop-filter: blur(20px) saturate(160%);
+      }
+
+      .page.stepper .group .field {
+        position: relative;
+        flex-direction: column;
+        gap: 2px;
+        padding: 12px 16px;
+      }
+
+      /* Hairline separators inset from the left, like iOS lists */
+      .page.stepper .group .field + .field::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 16px;
+        right: 0;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .page.stepper .f-label,
+      .page.stepper .f-label.light {
+        width: auto;
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: 0.01em;
+        color: rgba(235, 235, 245, 0.6);
+      }
+
+      .page.stepper .f-value,
+      .page.stepper .f-value.light {
+        font-size: 17px;
+        font-weight: 500;
+        line-height: 1.35;
+        letter-spacing: -0.01em;
+        color: #fff;
+      }
+
+      .page.stepper .f-sub,
+      .page.stepper .f-sub.light {
+        margin-top: 2px;
+        font-size: 15px;
+        font-weight: 400;
+        line-height: 1.35;
+        letter-spacing: 0;
+        color: rgba(235, 235, 245, 0.6);
+      }
+
+      /* Plain links (e.g. business venture) — inline gold overridden */
+      .page.stepper .f-sub a:not(.rainbow-border) {
+        color: var(--lime) !important;
+      }
+
+      .page.stepper .placeholder,
+      .page.stepper .placeholder.light {
+        color: rgba(255, 255, 255, 0.3);
+      }
+
+      /* Wider screens: label left, value right (like macOS Contacts) */
+      @media (min-width: 768px) {
+        .page.stepper .group .field {
+          flex-direction: row;
+          align-items: baseline;
+          gap: 16px;
+          padding: 14px 20px;
+        }
+        .page.stepper .group .field + .field::before {
+          left: 20px;
+        }
+        .page.stepper .f-label,
+        .page.stepper .f-label.light {
+          width: 150px;
+          flex-shrink: 0;
+          font-size: 15px;
+        }
+      }
+
+      /* Navigation bar — floating glass toolbar (Apple-style material).
+         58px + margins = 80px, matching the steps' calc(100vh - 80px). */
       .step-nav {
+        position: relative;
+        z-index: 1;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 12px;
-        padding: 16px 28px 32px;
-        position: relative;
-        z-index: 1;
-        background: rgba(21, 88, 201, 0.08);
-        border-top: 1px solid rgba(21, 88, 201, 0.35);
-        backdrop-filter: blur(12px);
+        gap: 8px;
+        width: calc(100% - 32px);
+        max-width: 440px;
+        margin: 2px auto 20px;
+        padding: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 999px;
+        background: rgba(18, 22, 34, 0.55);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.12),
+          0 12px 32px rgba(0, 0, 0, 0.45);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        backdrop-filter: blur(20px) saturate(180%);
+        font-family:
+          -apple-system,
+          BlinkMacSystemFont,
+          "SF Pro Text",
+          "Segoe UI",
+          system-ui,
+          sans-serif;
+        animation: navIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+      }
+
+      @keyframes navIn {
+        from {
+          opacity: 0;
+          transform: translateY(12px) scale(0.98);
+        }
       }
 
       .step-count {
-        font-size: 12px;
-        font-weight: 700;
-        letter-spacing: 1.5px;
-        color: rgba(255, 255, 255, 0.35);
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        font-variant-numeric: tabular-nums;
+        color: rgba(255, 255, 255, 0.6);
+        animation: pullUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.16s backwards;
       }
 
-      /* Stepper buttons — Split Work teal style */
+      /* Pill buttons — Prisma hero style: label + round arrow chip.
+         They pull up like the hero text; hover widens the gap and grows
+         the chip; press scales down instantly. "backwards" fill so the
+         entrance never overrides the press transform afterwards. */
       .btn {
-        position: relative;
         display: inline-flex;
         align-items: center;
-        justify-content: center;
+        gap: 8px;
         height: 44px;
-        padding: 0 20px;
-        border: 1px solid rgba(21, 88, 201, 0.5);
-        border-radius: 14px;
-        font-family: inherit;
-        font-size: 14px;
+        border: 0;
+        border-radius: 999px;
+        font: inherit;
+        font-size: 15px;
         font-weight: 600;
-        color: rgba(255, 255, 255, 0.8);
-        background: rgba(21, 88, 201, 0.12);
+        letter-spacing: -0.01em;
         cursor: pointer;
         white-space: nowrap;
+        -webkit-tap-highlight-color: transparent;
         transition:
-          background 0.2s ease,
-          opacity 0.2s ease;
+          gap 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+          background-color 0.2s ease,
+          opacity 0.2s ease,
+          transform 0.1s ease-out;
+        animation: pullUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
       }
 
-      .btn:hover {
-        background: rgba(21, 88, 201, 0.24);
+      .btn:active:not(:disabled) {
+        transform: scale(0.97);
+      }
+
+      .btn:focus-visible {
+        outline: 2px solid var(--lime);
+        outline-offset: 3px;
       }
 
       .btn:disabled {
-        opacity: 0.3;
-        cursor: not-allowed;
+        opacity: 0.35;
+        cursor: default;
       }
 
       .btn-prev {
-        padding-left: 50px;
+        padding: 4px 18px 4px 4px;
+        color: #fff;
+        background: rgba(21, 88, 201, 0.22);
+        animation-delay: 0.08s;
       }
 
       .btn-next {
-        padding-right: 50px;
-        background: var(--lime);
-        border: none;
+        padding: 4px 4px 4px 20px;
         color: var(--midnight);
-        box-shadow: 0 6px 24px rgba(212, 255, 36, 0.3);
-      }
-
-      .btn-next:hover {
-        background: #e0ff66;
-      }
-
-      .btn-next .btn-ico {
-        background: rgba(3, 4, 7, 0.12);
+        background: var(--lime);
+        animation-delay: 0.24s;
       }
 
       .btn-ico {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        width: 38px;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: rgba(255, 255, 255, 0.14);
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
       }
 
-      .btn-ico-left {
-        left: 0;
-        border-radius: 14px 0 0 14px;
+      .btn-prev .btn-ico {
+        background: var(--cobalt);
+        color: #fff;
       }
 
-      .btn-ico-right {
-        right: 0;
-        border-radius: 0 14px 14px 0;
+      .btn-next .btn-ico {
+        background: var(--midnight);
+        color: var(--lime);
       }
 
       .btn-ico svg {
         width: 16px;
         height: 16px;
-        opacity: 0.85;
+      }
+
+      /* Hover only where a real pointer exists (no sticky hover on touch) */
+      @media (hover: hover) {
+        .btn:hover:not(:disabled) {
+          gap: 12px;
+        }
+        .btn:hover:not(:disabled) .btn-ico {
+          transform: scale(1.1);
+        }
+        .btn-prev:hover:not(:disabled) {
+          background: rgba(21, 88, 201, 0.34);
+        }
+        .btn-next:hover:not(:disabled) {
+          background: #e0ff66;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .step-nav,
+        .step-count,
+        .btn {
+          animation: none;
+        }
+        .btn,
+        .btn-ico {
+          transition: none;
+        }
+      }
+
+      @media (prefers-reduced-transparency: reduce) {
+        .step-nav {
+          background: #12161f;
+          -webkit-backdrop-filter: none;
+          backdrop-filter: none;
+        }
       }
 
       /* ═══════════════════════════════════════
@@ -1674,8 +1967,29 @@
         if (photo) photo.remove();
         if (nameBar) nameBar.remove();
 
-        // Steps 2–5
-        makeStep([family], false);
+        // Apple-style grouping: wrap each section's rows in one rounded group
+        document.querySelectorAll(".section").forEach(function (sec) {
+          var rows = sec.querySelectorAll(":scope > .field");
+          if (!rows.length) return;
+          var group = document.createElement("div");
+          group.className = "group";
+          rows.forEach(function (r) {
+            group.appendChild(r);
+          });
+          sec.appendChild(group);
+        });
+
+        // Steps 2–5. Family sits in a ContainerScroll card (vanilla port of
+        // the Aceternity component); its tilt-to-flat plays by itself in CSS
+        // whenever the page opens.
+        var famScroll = document.createElement("div");
+        famScroll.className = "cs-container";
+        famScroll.innerHTML =
+          '<div class="cs-header"><h2 class="cs-title">Meet my <span>Family</span></h2></div>' +
+          '<div class="cs-card"><div class="cs-screen"></div></div>';
+        if (family) famScroll.querySelector(".cs-screen").appendChild(family);
+
+        makeStep([famScroll], false);
         makeStep([education, undergrad], false);
         makeStep([hobbies], false);
         makeStep([personal], true);
@@ -1697,21 +2011,21 @@
         page.appendChild(menu);
         page.classList.add("stepper");
 
-        // Navigation bar
-        var chevL =
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>';
-        var chevR =
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>';
+        // Navigation bar — lucide ArrowLeft / ArrowRight in round chips
+        var arrowL =
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>';
+        var arrowR =
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>';
 
         var nav = document.createElement("div");
         nav.className = "step-nav";
         nav.innerHTML =
-          '<button class="btn btn-prev" id="prevBtn"><span class="btn-ico btn-ico-left">' +
-          chevL +
+          '<button class="btn btn-prev" id="prevBtn"><span class="btn-ico">' +
+          arrowL +
           "</span>Previous</button>" +
           '<span class="step-count" id="stepCount"></span>' +
-          '<button class="btn btn-next" id="nextBtn">Next<span class="btn-ico btn-ico-right">' +
-          chevR +
+          '<button class="btn btn-next" id="nextBtn">Next<span class="btn-ico">' +
+          arrowR +
           "</span></button>";
         page.appendChild(nav);
 
