@@ -655,6 +655,22 @@
         background: #111;
       }
 
+      /* When a phone blocks autoplay (e.g. iPhone Low Power Mode) the browser
+         draws a big play button; hide it so the cover shows as a still image.
+         Separate rules: one unknown pseudo-element would void a shared rule. */
+      .hero-video::-webkit-media-controls-start-playback-button {
+        display: none !important;
+        -webkit-appearance: none;
+      }
+
+      .hero-video::-webkit-media-controls-overlay-play-button {
+        display: none !important;
+      }
+
+      .hero-video::-webkit-media-controls {
+        display: none !important;
+      }
+
       .hero-noise {
         opacity: 0.7;
         mix-blend-mode: overlay;
@@ -1957,6 +1973,20 @@
           '<span class="hero-btn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>' +
           "</button></div></div></div>";
         steps.appendChild(hero);
+
+        // Phones may refuse autoplay (e.g. iPhone Low Power Mode). Set the
+        // muted property explicitly (iOS needs it), try to play now, and try
+        // again on the first tap anywhere, which phones always allow.
+        var heroVideo = hero.querySelector(".hero-video");
+        heroVideo.muted = true;
+        function playHeroVideo() {
+          var playing = heroVideo.play();
+          if (playing && playing.catch) playing.catch(function () {});
+        }
+        playHeroVideo();
+        ["touchend", "click"].forEach(function (type) {
+          document.addEventListener(type, playHeroVideo, { once: true, passive: true });
+        });
 
         // Top menu — lives on the page (not the hero) so it shows on every step
         var menu = document.createElement("nav");
